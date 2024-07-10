@@ -2,19 +2,39 @@
 
 use crate::{Limb, Uint, WideWord, Word};
 
+#[cfg(all(
+    target_os = "zkvm",
+    target_vendor = "succinct",
+    target_arch = "riscv32"
+))]
+use crate::succinct;
+
 impl<const LIMBS: usize> Uint<LIMBS> {
     /// Computes `self * rhs mod p` for the special modulus
     /// `p = MAX+1-c` where `c` is small enough to fit in a single [`Limb`].
     /// For the modulus reduction, this function implements Algorithm 14.47 from
     /// the "Handbook of Applied Cryptography", by A. Menezes, P. van Oorschot,
     /// and S. Vanstone, CRC Press, 1996.
-    pub const fn mul_mod_special(&self, rhs: &Self, c: Limb) -> Self {
+    pub fn mul_mod_special(&self, rhs: &Self, c: Limb) -> Self {
         // We implicitly assume `LIMBS > 0`, because `Uint<0>` doesn't compile.
         // Still the case `LIMBS == 1` needs special handling.
         if LIMBS == 1 {
             let prod = self.limbs[0].0 as WideWord * rhs.limbs[0].0 as WideWord;
             let reduced = prod % Word::MIN.wrapping_sub(c.0) as WideWord;
             return Self::from_word(reduced as Word);
+        }
+
+        #[cfg(all(
+            target_os = "zkvm",
+            target_vendor = "succinct",
+            target_arch = "riscv32"
+        ))]
+        if LIMBS == succinct::BIGINT_WIDTH_WORDS {
+            return succinct::modmul_uint_256(
+                &self,
+                rhs,
+                &Uint::<LIMBS>::ZERO.wrapping_sub(&c.into()),
+            );
         }
 
         let (lo, hi) = self.mul_wide(rhs);
@@ -93,6 +113,16 @@ mod tests {
                     }
 
                     for _i in 0..100 {
+                        let iterations = if cfg!(all(
+                            target_os = "zkvm",
+                            target_vendor = "succinct",
+                            target_arch = "riscv32"
+                        )) {
+                            1
+                        } else {
+                            100
+                        };
+
                         let a = Uint::<$size>::random_mod(&mut rng, p);
                         let b = Uint::<$size>::random_mod(&mut rng, p);
 

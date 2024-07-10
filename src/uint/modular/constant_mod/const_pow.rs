@@ -9,10 +9,7 @@ use alloc::vec::Vec;
 
 impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     /// Raises to the `exponent` power.
-    pub const fn pow<const RHS_LIMBS: usize>(
-        &self,
-        exponent: &Uint<RHS_LIMBS>,
-    ) -> Residue<MOD, LIMBS> {
+    pub fn pow<const RHS_LIMBS: usize>(&self, exponent: &Uint<RHS_LIMBS>) -> Residue<MOD, LIMBS> {
         self.pow_bounded_exp(exponent, Uint::<RHS_LIMBS>::BITS)
     }
 
@@ -21,7 +18,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     /// to take into account for the exponent.
     ///
     /// NOTE: `exponent_bits` may be leaked in the time pattern.
-    pub const fn pow_bounded_exp<const RHS_LIMBS: usize>(
+    pub fn pow_bounded_exp<const RHS_LIMBS: usize>(
         &self,
         exponent: &Uint<RHS_LIMBS>,
         exponent_bits: usize,

@@ -12,7 +12,7 @@ use super::{Residue, ResidueParams};
 
 impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     /// Multiplies by `rhs`.
-    pub const fn mul(&self, rhs: &Self) -> Self {
+    pub fn mul(&self, rhs: &Self) -> Self {
         Self {
             montgomery_form: mul_montgomery_form(
                 &self.montgomery_form,
@@ -25,7 +25,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     }
 
     /// Computes the (reduced) square of a residue.
-    pub const fn square(&self) -> Self {
+    pub fn square(&self) -> Self {
         Self {
             montgomery_form: square_montgomery_form(
                 &self.montgomery_form,

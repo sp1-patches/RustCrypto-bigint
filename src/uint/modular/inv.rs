@@ -1,14 +1,31 @@
-use crate::{modular::reduction::montgomery_reduction, CtChoice, Limb, Uint};
+use crate::{modular::mul::mul_montgomery_form, CtChoice, Limb, Uint};
 
-pub const fn inv_montgomery_form<const LIMBS: usize>(
+#[cfg(all(
+    target_os = "zkvm",
+    target_vendor = "succinct",
+    target_arch = "riscv32"
+))]
+use crate::succinct;
+
+pub fn inv_montgomery_form<const LIMBS: usize>(
     x: &Uint<LIMBS>,
     modulus: &Uint<LIMBS>,
     r3: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> (Uint<LIMBS>, CtChoice) {
     let (inverse, is_some) = x.inv_odd_mod(modulus);
+
+    #[cfg(all(
+        target_os = "zkvm",
+        target_vendor = "succinct",
+        target_arch = "riscv32"
+    ))]
+    if LIMBS == succinct::BIGINT_WIDTH_WORDS {
+        return (inverse, is_some);
+    }
+
     (
-        montgomery_reduction(&inverse.mul_wide(r3), modulus, mod_neg_inv),
+        mul_montgomery_form(&inverse, r3, modulus, mod_neg_inv),
         is_some,
     )
 }
