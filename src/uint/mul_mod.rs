@@ -30,9 +30,19 @@ impl<const LIMBS: usize> Uint<LIMBS> {
             target_arch = "riscv32"
         ))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
-            return succinct::modmul_uint_256(
+            let self_reduced = succinct::modmul_uint_256(
                 &self,
+                &Uint::<LIMBS>::ONE,
+                &Uint::<LIMBS>::ZERO.wrapping_sub(&c.into()),
+            );
+            let rhs_reduced = succinct::modmul_uint_256(
                 rhs,
+                &Uint::<LIMBS>::ONE,
+                &Uint::<LIMBS>::ZERO.wrapping_sub(&c.into()),
+            );
+            return succinct::modmul_uint_256(
+                &self_reduced,
+                &rhs_reduced,
                 &Uint::<LIMBS>::ZERO.wrapping_sub(&c.into()),
             );
         }
