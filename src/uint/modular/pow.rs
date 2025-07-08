@@ -7,8 +7,7 @@ use alloc::vec::Vec;
 
 #[cfg(all(
     target_os = "zkvm",
-    target_vendor = "succinct",
-    target_arch = "riscv32"
+    target_vendor = "succinct"
 ))]
 use crate::succinct;
 
@@ -47,22 +46,14 @@ pub fn multi_exponentiate_montgomery_form_array<
     r: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> Uint<LIMBS> {
-    #[cfg(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    ))]
+    #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     let one = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
         Uint::<LIMBS>::ONE
     } else {
         *r // 1 in Montgomery form
     };
 
-    #[cfg(not(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    )))]
+    #[cfg(not(all(target_os = "zkvm", target_vendor = "succinct")))]
     let one = *r; // 1 in Montgomery form
 
     if exponent_bits == 0 {
@@ -102,22 +93,14 @@ pub fn multi_exponentiate_montgomery_form_slice<const LIMBS: usize, const RHS_LI
     r: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> Uint<LIMBS> {
-    #[cfg(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    ))]
+    #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     let one = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
         Uint::<LIMBS>::ONE
     } else {
         *r // 1 in Montgomery form
     };
 
-    #[cfg(not(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    )))]
+    #[cfg(not(all(target_os = "zkvm", target_vendor = "succinct")))]
     let one = *r; // 1 in Montgomery form
 
     if exponent_bits == 0 {

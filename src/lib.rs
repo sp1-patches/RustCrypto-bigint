@@ -171,11 +171,7 @@ mod traits;
 mod uint;
 mod wrapping;
 
-#[cfg(all(
-    target_os = "zkvm",
-    target_vendor = "succinct",
-    target_arch = "riscv32"
-))]
+#[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
 pub mod succinct;
 
 pub use crate::{

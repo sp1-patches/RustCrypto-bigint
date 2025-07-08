@@ -2,11 +2,7 @@ use crate::{Limb, Uint};
 
 use super::reduction::montgomery_reduction;
 
-#[cfg(all(
-    target_os = "zkvm",
-    target_vendor = "succinct",
-    target_arch = "riscv32"
-))]
+#[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
 use crate::succinct;
 
 pub(crate) fn mul_montgomery_form<const LIMBS: usize>(
@@ -15,11 +11,7 @@ pub(crate) fn mul_montgomery_form<const LIMBS: usize>(
     modulus: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> Uint<LIMBS> {
-    #[cfg(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    ))]
+    #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     if LIMBS == succinct::BIGINT_WIDTH_WORDS {
         return succinct::modmul_uint_256(a, b, modulus);
     }
@@ -33,11 +25,7 @@ pub(crate) fn square_montgomery_form<const LIMBS: usize>(
     modulus: &Uint<LIMBS>,
     mod_neg_inv: Limb,
 ) -> Uint<LIMBS> {
-    #[cfg(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    ))]
+    #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     if LIMBS == succinct::BIGINT_WIDTH_WORDS {
         return succinct::modmul_uint_256(a, a, modulus);
     }

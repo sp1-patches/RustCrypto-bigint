@@ -16,11 +16,7 @@ use {
     serdect::serde::{Deserialize, Deserializer, Serialize, Serializer},
 };
 
-#[cfg(all(
-    target_os = "zkvm",
-    target_vendor = "succinct",
-    target_arch = "riscv32"
-))]
+#[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
 use crate::succinct;
 
 /// Additions between residues with a constant modulus
@@ -89,11 +85,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     };
 
     /// The representation of 1 mod `MOD`.
-    #[cfg(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    ))]
+    #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     pub const ONE: Self = {
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             Self {
@@ -109,11 +101,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     };
 
     /// The representation of 1 mod `MOD`.
-    #[cfg(not(all(
-        target_os = "zkvm",
-        target_vendor = "succinct",
-        target_arch = "riscv32"
-    )))]
+    #[cfg(not(all(target_os = "zkvm", target_vendor = "succinct")))]
     pub const ONE: Self = Self {
         montgomery_form: MOD::R,
         phantom: PhantomData,
@@ -121,11 +109,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
 
     // Internal helper function to generate a residue; this lets us wrap the constructors more cleanly
     fn generate_residue(integer: &Uint<LIMBS>) -> Self {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             return Self {
                 montgomery_form: succinct::modmul_uint_256(
@@ -172,11 +156,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
 
     /// Retrieves the integer currently encoded in this `Residue`, guaranteed to be reduced.
     pub fn retrieve(&self) -> Uint<LIMBS> {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             return self.montgomery_form;
         }
@@ -283,20 +263,12 @@ where
     where
         D: Deserializer<'de>,
     {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         let r_inv: Uint<{ LIMBS }> = MOD::R.inv_odd_mod(&MOD::MODULUS).0;
 
         Uint::<LIMBS>::deserialize(deserializer).and_then(|montgomery_form| {
             if Uint::ct_lt(&montgomery_form, &MOD::MODULUS).into() {
-                #[cfg(all(
-                    target_os = "zkvm",
-                    target_vendor = "succinct",
-                    target_arch = "riscv32"
-                ))]
+                #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
                 if LIMBS == succinct::BIGINT_WIDTH_WORDS {
                     let value = succinct::modmul_uint_256(&montgomery_form, &r_inv, &MOD::MODULUS);
                     return Ok(Self {
@@ -326,11 +298,7 @@ where
     where
         S: Serializer,
     {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             let value = succinct::modmul_uint_256(&self.montgomery_form, &MOD::R, &MOD::MODULUS);
             return value.serialize(serializer);

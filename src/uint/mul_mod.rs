@@ -2,11 +2,7 @@
 
 use crate::{Limb, Uint, WideWord, Word};
 
-#[cfg(all(
-    target_os = "zkvm",
-    target_vendor = "succinct",
-    target_arch = "riscv32"
-))]
+#[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
 use crate::succinct;
 
 impl<const LIMBS: usize> Uint<LIMBS> {
@@ -24,11 +20,7 @@ impl<const LIMBS: usize> Uint<LIMBS> {
             return Self::from_word(reduced as Word);
         }
 
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             let self_reduced = succinct::modmul_uint_256(
                 &self,
@@ -123,15 +115,12 @@ mod tests {
                     }
 
                     for _i in 0..100 {
-                        let iterations = if cfg!(all(
-                            target_os = "zkvm",
-                            target_vendor = "succinct",
-                            target_arch = "riscv32"
-                        )) {
-                            1
-                        } else {
-                            100
-                        };
+                        let iterations =
+                            if cfg!(all(target_os = "zkvm", target_vendor = "succinct")) {
+                                1
+                            } else {
+                                100
+                            };
 
                         let a = Uint::<$size>::random_mod(&mut rng, p);
                         let b = Uint::<$size>::random_mod(&mut rng, p);

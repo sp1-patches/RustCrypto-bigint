@@ -9,11 +9,7 @@ use super::{
 
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
 
-#[cfg(all(
-    target_os = "zkvm",
-    target_vendor = "succinct",
-    target_arch = "riscv32"
-))]
+#[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
 use crate::succinct;
 
 /// Additions between residues with a modulus set at runtime
@@ -143,11 +139,7 @@ pub struct DynResidue<const LIMBS: usize> {
 impl<const LIMBS: usize> DynResidue<LIMBS> {
     /// Instantiates a new `Residue` that represents this `integer` mod `MOD`.
     pub fn new(integer: &Uint<LIMBS>, residue_params: DynResidueParams<LIMBS>) -> Self {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             return Self {
                 montgomery_form: succinct::modmul_uint_256(
@@ -174,11 +166,7 @@ impl<const LIMBS: usize> DynResidue<LIMBS> {
 
     /// Retrieves the integer currently encoded in this `Residue`, guaranteed to be reduced.
     pub fn retrieve(&self) -> Uint<LIMBS> {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             return self.montgomery_form;
         }
@@ -200,11 +188,7 @@ impl<const LIMBS: usize> DynResidue<LIMBS> {
 
     /// Instantiates a new `Residue` that represents 1.
     pub const fn one(residue_params: DynResidueParams<LIMBS>) -> Self {
-        #[cfg(all(
-            target_os = "zkvm",
-            target_vendor = "succinct",
-            target_arch = "riscv32"
-        ))]
+        #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             return Self {
                 montgomery_form: Uint::<LIMBS>::ONE,
