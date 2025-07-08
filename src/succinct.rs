@@ -3,17 +3,19 @@ use subtle::ConstantTimeLess;
 
 extern "C" {
     /// Computes a big integer operation with a modulus.
+    /// Must match the definition in sp1_lib. Defined here to prevent
+    /// a circular dependency.
     pub fn sys_bigint(
-        result: *mut [u32; 8],
-        op: u32,
-        x: *const [u32; 8],
-        y: *const [u32; 8],
-        modulus: *const [u32; 8],
+        result: *mut [u64; 4],
+        op: u64,
+        x: *const [u64; 4],
+        y: *const [u64; 4],
+        modulus: *const [u64; 4],
     );
 }
 
-pub const BIGINT_WIDTH_WORDS: usize = 8;
-const OP_MULTIPLY: u32 = 0;
+pub const BIGINT_WIDTH_WORDS: usize = 4;
+const OP_MULTIPLY: u64 = 0;
 
 #[inline(always)]
 pub(crate) fn modmul_uint_256<const LIMBS: usize>(
@@ -24,13 +26,13 @@ pub(crate) fn modmul_uint_256<const LIMBS: usize>(
     assert!(LIMBS == BIGINT_WIDTH_WORDS);
 
     let result = Uint::<LIMBS>::from_words(unsafe {
-        let mut out = core::mem::MaybeUninit::<[u32; LIMBS]>::uninit();
+        let mut out = core::mem::MaybeUninit::<[u64; LIMBS]>::uninit();
         sys_bigint(
-            out.as_mut_ptr() as *mut [u32; BIGINT_WIDTH_WORDS],
+            out.as_mut_ptr() as *mut [u64; BIGINT_WIDTH_WORDS],
             OP_MULTIPLY,
-            a.as_words().as_ptr() as *const [u32; BIGINT_WIDTH_WORDS],
-            b.as_words().as_ptr() as *const [u32; BIGINT_WIDTH_WORDS],
-            modulus.as_words().as_ptr() as *const [u32; BIGINT_WIDTH_WORDS],
+            a.as_words().as_ptr() as *const [u64; BIGINT_WIDTH_WORDS],
+            b.as_words().as_ptr() as *const [u64; BIGINT_WIDTH_WORDS],
+            modulus.as_words().as_ptr() as *const [u64; BIGINT_WIDTH_WORDS],
         );
         out.assume_init()
     });
@@ -40,19 +42,19 @@ pub(crate) fn modmul_uint_256<const LIMBS: usize>(
 
 #[inline(always)]
 pub fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
-    let mut a_pad = [0u32; BIGINT_WIDTH_WORDS];
+    let mut a_pad = [0u64; BIGINT_WIDTH_WORDS];
     a_pad[..U128::LIMBS].copy_from_slice(a.as_words());
-    let mut b_pad = [0u32; BIGINT_WIDTH_WORDS];
+    let mut b_pad = [0u64; BIGINT_WIDTH_WORDS];
     b_pad[..U128::LIMBS].copy_from_slice(b.as_words());
 
     U256::from_words(unsafe {
-        let mut out = core::mem::MaybeUninit::<[u32; BIGINT_WIDTH_WORDS]>::uninit();
+        let mut out = core::mem::MaybeUninit::<[u64; BIGINT_WIDTH_WORDS]>::uninit();
         sys_bigint(
             out.as_mut_ptr(),
             OP_MULTIPLY,
-            a_pad.as_ptr() as *const [u32; BIGINT_WIDTH_WORDS],
-            b_pad.as_ptr() as *const [u32; BIGINT_WIDTH_WORDS],
-            &[0u32; BIGINT_WIDTH_WORDS],
+            &a_pad,
+            &b_pad,
+            &[0u64; BIGINT_WIDTH_WORDS],
         );
         out.assume_init()
     })
@@ -61,7 +63,7 @@ pub fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
 #[inline(always)]
 pub fn modmul_u256_denormalized(a: &U256, b: &U256, modulus: &U256) -> U256 {
     U256::from_words(unsafe {
-        let mut out = core::mem::MaybeUninit::<[u32; BIGINT_WIDTH_WORDS]>::uninit();
+        let mut out = core::mem::MaybeUninit::<[u64; BIGINT_WIDTH_WORDS]>::uninit();
         sys_bigint(
             out.as_mut_ptr(),
             OP_MULTIPLY,
