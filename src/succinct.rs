@@ -5,7 +5,7 @@ extern "C" {
     /// Computes a big integer operation with a modulus.
     /// Must match the definition in sp1_lib. Defined here to prevent
     /// a circular dependency.
-    pub fn sys_bigint(
+    fn sys_bigint(
         result: *mut [u64; 4],
         op: u64,
         x: *const [u64; 4],
@@ -14,7 +14,7 @@ extern "C" {
     );
 }
 
-pub const BIGINT_WIDTH_WORDS: usize = 4;
+pub(crate) const BIGINT_WIDTH_WORDS: usize = 4;
 const OP_MULTIPLY: u64 = 0;
 
 #[inline(always)]
@@ -41,7 +41,7 @@ pub(crate) fn modmul_uint_256<const LIMBS: usize>(
 }
 
 #[inline(always)]
-pub fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
+pub(crate) fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
     let mut a_pad = [0u64; BIGINT_WIDTH_WORDS];
     a_pad[..U128::LIMBS].copy_from_slice(a.as_words());
     let mut b_pad = [0u64; BIGINT_WIDTH_WORDS];
@@ -61,7 +61,7 @@ pub fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
 }
 
 #[inline(always)]
-pub fn modmul_u256_denormalized(a: &U256, b: &U256, modulus: &U256) -> U256 {
+fn modmul_u256_denormalized(a: &U256, b: &U256, modulus: &U256) -> U256 {
     U256::from_words(unsafe {
         let mut out = core::mem::MaybeUninit::<[u64; BIGINT_WIDTH_WORDS]>::uninit();
         sys_bigint(
@@ -76,7 +76,7 @@ pub fn modmul_u256_denormalized(a: &U256, b: &U256, modulus: &U256) -> U256 {
 }
 
 #[inline(always)]
-pub fn modmul_u256(a: &U256, b: &U256, modulus: &U256) -> U256 {
+pub(crate) fn modmul_u256(a: &U256, b: &U256, modulus: &U256) -> U256 {
     let result = modmul_u256_denormalized(a, b, modulus);
     assert!(bool::from(result.ct_lt(&modulus)));
     result
