@@ -89,7 +89,7 @@ impl<MOD: ResidueParams<LIMBS>, const LIMBS: usize> Residue<MOD, LIMBS> {
     pub const ONE: Self = {
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             Self {
-                montgomery_form: Uint::<LIMBS>::ONE,
+                montgomery_form: Uint::<LIMBS>::ONE.const_rem(&MOD::MODULUS).0,
                 phantom: PhantomData,
             }
         } else {

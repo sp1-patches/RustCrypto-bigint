@@ -191,7 +191,7 @@ impl<const LIMBS: usize> DynResidue<LIMBS> {
         #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
         if LIMBS == succinct::BIGINT_WIDTH_WORDS {
             return Self {
-                montgomery_form: Uint::<LIMBS>::ONE,
+                montgomery_form: Uint::<LIMBS>::ONE.const_rem(&residue_params.modulus).0,
                 residue_params,
             };
         }

@@ -8,10 +8,17 @@ use crate::succinct;
 impl<const LIMBS: usize> Uint<LIMBS> {
     /// Computes `self * rhs mod p` for the special modulus
     /// `p = MAX+1-c` where `c` is small enough to fit in a single [`Limb`].
+    /// When `c` is zero, this is wrapping multiplication modulo `2^BITS`.
     /// For the modulus reduction, this function implements Algorithm 14.47 from
     /// the "Handbook of Applied Cryptography", by A. Menezes, P. van Oorschot,
     /// and S. Vanstone, CRC Press, 1996.
     pub fn mul_mod_special(&self, rhs: &Self, c: Limb) -> Self {
+        // c = 0 means reduction modulo 2^BITS, i.e. wrapping multiplication.
+        // Handle it before the single-limb division and the accelerated range check.
+        if c == Limb::ZERO {
+            return self.wrapping_mul(rhs);
+        }
+
         // We implicitly assume `LIMBS > 0`, because `Uint<0>` doesn't compile.
         // Still the case `LIMBS == 1` needs special handling.
         if LIMBS == 1 {

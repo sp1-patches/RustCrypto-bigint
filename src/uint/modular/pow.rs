@@ -48,7 +48,7 @@ pub fn multi_exponentiate_montgomery_form_array<
 ) -> Uint<LIMBS> {
     #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     let one = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
-        Uint::<LIMBS>::ONE
+        Uint::<LIMBS>::ONE.const_rem(modulus).0
     } else {
         *r // 1 in Montgomery form
     };
@@ -95,7 +95,7 @@ pub fn multi_exponentiate_montgomery_form_slice<const LIMBS: usize, const RHS_LI
 ) -> Uint<LIMBS> {
     #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
     let one = if LIMBS == succinct::BIGINT_WIDTH_WORDS {
-        Uint::<LIMBS>::ONE
+        Uint::<LIMBS>::ONE.const_rem(modulus).0
     } else {
         *r // 1 in Montgomery form
     };
