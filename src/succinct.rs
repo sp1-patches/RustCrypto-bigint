@@ -41,7 +41,7 @@ pub(crate) fn modmul_uint_256<const LIMBS: usize>(
 }
 
 #[inline(always)]
-pub(crate) fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
+pub fn mul_wide_u128(a: &U128, b: &U128) -> U256 {
     let mut a_pad = [0u64; BIGINT_WIDTH_WORDS];
     a_pad[..U128::LIMBS].copy_from_slice(a.as_words());
     let mut b_pad = [0u64; BIGINT_WIDTH_WORDS];

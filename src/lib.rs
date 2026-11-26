@@ -172,7 +172,8 @@ mod uint;
 mod wrapping;
 
 #[cfg(all(target_os = "zkvm", target_vendor = "succinct"))]
-pub(crate) mod succinct;
+#[allow(unsafe_code)]
+pub mod succinct;
 
 pub use crate::{
     checked::Checked,
